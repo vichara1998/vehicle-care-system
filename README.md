@@ -48,7 +48,7 @@ vehicle-care-system/
 │   ├── cart/                 # Cart request handlers
 │   └── orders/               # Order submission handler
 └── assets/
-    ├── css/                  # Stylesheets
+    ├── css/                  # Page styles and shared responsive UI
     ├── js/                   # JavaScript
     └── images/
         ├── backgrounds/
