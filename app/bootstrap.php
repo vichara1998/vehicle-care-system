@@ -127,6 +127,23 @@ function app_require_authenticated_user(): int
     return $userId;
 }
 
+function app_is_admin(): bool
+{
+    return isset($_SESSION['role']) && is_string($_SESSION['role']) && strtolower($_SESSION['role']) === 'admin';
+}
+
+function app_require_admin(): int
+{
+    $userId = app_require_authenticated_user();
+
+    if (!app_is_admin()) {
+        http_response_code(403);
+        exit('You do not have permission to access this page.');
+    }
+
+    return $userId;
+}
+
 function product_image_url(?string $imagePath): string
 {
     $imagePath = trim(str_replace('\\', '/', $imagePath ?? ''));
