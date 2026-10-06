@@ -174,6 +174,7 @@ $conn->close();
             margin: 0 auto 20px;
         }
     </style>
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
 </head>
 
 <body>
@@ -191,7 +192,7 @@ $conn->close();
 
     <div class="container">
         <div class="spare-part-details">
-            <img src="<?= htmlspecialchars($spare_part['image_path']) ?>" alt="<?= htmlspecialchars($spare_part['item_name']) ?>" class="spare-part-image">
+            <img src="<?= htmlspecialchars(product_image_url($spare_part['image_path']), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($spare_part['item_name'], ENT_QUOTES, 'UTF-8') ?>" class="spare-part-image">
             <h1><?= htmlspecialchars($spare_part['item_name']) ?></h1>
             <p><?= htmlspecialchars($spare_part['description']) ?></p>
             <p class="price" id="price">Price: $<?= htmlspecialchars($spare_part['price']) ?></p>

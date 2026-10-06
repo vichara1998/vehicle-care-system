@@ -245,6 +245,7 @@ $conn->close();
         }
 
     </style>
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
 </head>
 
 <body>
@@ -286,7 +287,7 @@ $conn->close();
             <?php else: ?>
                 <?php foreach ($spare_parts as $part): ?>
                     <div class="spare-part">
-                        <img src="<?= htmlspecialchars($part['image_path']) ?>" alt="<?= htmlspecialchars($part['item_name']) ?>" class="spare-part-image">
+                        <img src="<?= htmlspecialchars(product_image_url($part['image_path']), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($part['item_name'], ENT_QUOTES, 'UTF-8') ?>" class="spare-part-image">
                         <h3>
                             <a href="pages/spare_part_details.php?id=<?= htmlspecialchars($part['spare_id']) ?>">
                                 <?= htmlspecialchars($part['item_name']) ?>
