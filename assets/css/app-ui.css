@@ -1,0 +1,793 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    color-scheme: light;
+    --ui-ink: #173b5e;
+    --ui-ink-deep: #102c47;
+    --ui-blue: #1672b8;
+    --ui-blue-dark: #105b95;
+    --ui-teal: #168879;
+    --ui-teal-dark: #106b60;
+    --ui-amber: #f3a642;
+    --ui-canvas: #edf3f8;
+    --ui-surface: #ffffff;
+    --ui-muted: #61758a;
+    --ui-border: #d7e2ec;
+    --ui-shadow: 0 10px 28px rgba(23, 59, 94, 0.1);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    color: var(--ui-ink);
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.55;
+    background: var(--ui-canvas);
+    -webkit-font-smoothing: antialiased;
+}
+
+img {
+    max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+p {
+    overflow-wrap: anywhere;
+}
+
+a {
+    text-underline-offset: 0.18em;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid rgba(0, 123, 255, 0.45);
+    outline-offset: 2px;
+}
+
+.menu-bar {
+    padding: 8px 16px;
+}
+
+.menu-bar ul {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+
+.menu-bar li {
+    margin: 0 4px;
+}
+
+.menu-bar a {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 14px;
+}
+
+.container,
+.forum-container,
+.profile-details,
+.chat-container {
+    width: min(1120px, calc(100% - 32px));
+    margin: clamp(20px, 4vw, 40px) auto;
+}
+
+.container {
+    border-radius: 12px;
+}
+
+.forum-container,
+.profile-details,
+.chat-container {
+    padding: clamp(18px, 3vw, 30px);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.main-border {
+    width: min(100% - 32px, 460px);
+    margin: clamp(28px, 8vh, 72px) auto;
+    padding: 24px clamp(18px, 4vw, 32px);
+}
+
+input,
+select,
+textarea,
+button {
+    max-width: 100%;
+    font: inherit;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+    min-height: 42px;
+    padding: 9px 12px;
+    border: 1px solid #c9ced3;
+    border-radius: 6px;
+}
+
+textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+button,
+.button-link,
+.btn {
+    min-height: 42px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: filter 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+button:hover,
+.button-link:hover,
+.btn:hover {
+    filter: brightness(0.96);
+    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.12);
+}
+
+button:active,
+.button-link:active,
+.btn:active {
+    transform: translateY(1px);
+}
+
+table {
+    max-width: 100%;
+}
+
+.container table,
+.order-items table,
+.cart-summary table {
+    overflow-x: auto;
+}
+
+th,
+td {
+    padding: 10px 12px;
+    vertical-align: middle;
+}
+
+.cards-container {
+    align-items: stretch;
+    gap: clamp(14px, 2vw, 22px);
+    padding: clamp(16px, 3vw, 28px);
+}
+
+.card,
+.card2,
+.order-item,
+.ad-box,
+.spare-part {
+    border-radius: 10px;
+}
+
+.card:hover,
+.ad-box:hover {
+    transform: translateY(-3px);
+}
+
+.ads-display {
+    width: min(1120px, calc(100% - 32px));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 20px;
+    margin: 24px auto;
+}
+
+.ad-image img,
+.spare-part-image {
+    object-fit: contain;
+}
+
+.chat-history,
+.discussions,
+.order-items {
+    min-width: 0;
+}
+
+.chat-history,
+.answers {
+    overflow-wrap: anywhere;
+}
+
+.error-message,
+.success-message {
+    padding: 10px 14px;
+    border-radius: 6px;
+}
+
+.error-message {
+    background: #fbe9e7;
+}
+
+.success-message {
+    background: #e8f5e9;
+}
+
+.page-placeholder {
+    max-width: 760px;
+    padding: clamp(28px, 6vw, 56px);
+    text-align: center;
+}
+
+.page-placeholder p {
+    max-width: 560px;
+    margin: 12px auto 24px;
+}
+
+.page-placeholder .placeholder-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.page-placeholder .placeholder-actions a {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    padding: 9px 16px;
+    border: 1px solid #c9ced3;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+@media (max-width: 700px) {
+    .menu-bar {
+        position: static;
+        padding: 8px;
+    }
+
+    .menu-bar ul {
+        justify-content: center;
+    }
+
+    .menu-bar li {
+        margin: 0;
+    }
+
+    .menu-bar a {
+        padding: 8px 10px;
+        font-size: 15px;
+    }
+
+    .container,
+    .forum-container,
+    .profile-details,
+    .chat-container {
+        width: calc(100% - 24px);
+        margin: 16px auto;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    .cards-container {
+        justify-content: stretch;
+    }
+
+    .card {
+        width: min(100%, 360px);
+        height: auto;
+        min-height: 300px;
+    }
+
+    .cart-table,
+    .container table,
+    .order-items table,
+    .cart-summary table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .cart-table input[type="number"] {
+        width: 76px;
+    }
+
+    .ads-display {
+        width: calc(100% - 24px);
+    }
+
+    .main-border {
+        width: calc(100% - 24px);
+        margin: 24px auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+body.img-background {
+    background-color: var(--ui-ink-deep);
+    background-image:
+        linear-gradient(135deg, rgba(16, 44, 71, 0.88), rgba(22, 114, 184, 0.68)),
+        url("../images/backgrounds/imgbg1.png");
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+}
+
+.menu-bar {
+    color: #fff;
+    background: linear-gradient(100deg, var(--ui-ink-deep), var(--ui-ink), #205982) !important;
+    box-shadow: 0 5px 18px rgba(16, 44, 71, 0.2) !important;
+}
+
+.menu-bar ul li a,
+.menu-bar a {
+    color: #fff !important;
+    border-radius: 7px;
+}
+
+.menu-bar ul li a:hover,
+.menu-bar a:hover {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    text-shadow: none !important;
+}
+
+.menu-bar a.button-link,
+.button-link,
+.add-to-cart-btn,
+.checkout-button,
+.order-button,
+.btn,
+.page-placeholder .placeholder-actions a:first-child {
+    color: #fff !important;
+    background: var(--ui-teal) !important;
+    border: 0;
+}
+
+.menu-bar a.button-link:hover,
+.button-link:hover,
+.add-to-cart-btn:hover,
+.checkout-button:hover,
+.order-button:hover,
+.btn:hover,
+.page-placeholder .placeholder-actions a:first-child:hover {
+    background: var(--ui-teal-dark) !important;
+}
+
+.container,
+.forum-container,
+.profile-details,
+.chat-container,
+.main-border,
+.card2,
+.order-item,
+.ad-box,
+.spare-part {
+    color: var(--ui-ink);
+    background-color: var(--ui-surface) !important;
+    border: 1px solid var(--ui-border);
+    box-shadow: var(--ui-shadow);
+}
+
+.container h1,
+.container h2,
+.forum-container h1,
+.forum-container h2,
+.profile-details h2,
+.chat-container h1,
+.spare-part-heading,
+.content h1 {
+    color: var(--ui-ink) !important;
+    text-shadow: none !important;
+}
+
+.content {
+    padding: clamp(22px, 4vw, 44px) 12px 0;
+}
+
+.content h1 {
+    margin: 0 0 8px;
+    font-size: clamp(2rem, 5vw, 3.25rem) !important;
+    color: #fff !important;
+    text-shadow: 0 2px 12px rgba(16, 44, 71, 0.55) !important;
+}
+
+.content p {
+    color: #fff !important;
+    text-shadow: 0 1px 6px rgba(16, 44, 71, 0.65) !important;
+}
+
+.cards-container {
+    max-width: 1220px;
+    margin: 0 auto;
+}
+
+.card {
+    background: var(--ui-surface);
+    box-shadow: var(--ui-shadow);
+}
+
+.card-content {
+    display: grid;
+    place-items: center;
+    min-height: 30%;
+    border-top: 3px solid var(--ui-blue);
+    background: linear-gradient(180deg, #fff, #edf5fb) !important;
+}
+
+.card-content h3 {
+    color: var(--ui-ink) !important;
+    text-shadow: none !important;
+}
+
+.favorite-icon.active:before {
+    color: var(--ui-amber) !important;
+}
+
+.main-border {
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(10px);
+}
+
+.main-border h2 {
+    color: var(--ui-ink) !important;
+    font-size: clamp(1.6rem, 4vw, 2rem) !important;
+}
+
+.main-border form {
+    max-width: none;
+    margin: 12px 0;
+    opacity: 1;
+}
+
+.main-border input:not([type="checkbox"]):not([type="radio"]) {
+    width: 100%;
+    background: #f8fbfe;
+}
+
+.main-border form button,
+.profile-details button,
+.add-discussion button,
+.add-answer button,
+.chat-form button,
+.checkout-form button {
+    color: #fff;
+    background: var(--ui-blue);
+    border-radius: 7px;
+}
+
+.main-border form button:hover,
+.profile-details button:hover,
+.add-discussion button:hover,
+.add-answer button:hover,
+.chat-form button:hover,
+.checkout-form button:hover {
+    background: var(--ui-blue-dark);
+}
+
+.profile-details {
+    width: min(760px, calc(100% - 32px)) !important;
+    opacity: 1;
+}
+
+.profile-details h2 {
+    font-size: clamp(1.7rem, 4vw, 2.25rem) !important;
+}
+
+.profile-details label {
+    color: var(--ui-ink);
+}
+
+.profile-details button#save-button {
+    background: var(--ui-teal);
+}
+
+.profile-details button#edit-button {
+    background: var(--ui-blue);
+}
+
+.success-message {
+    width: min(100% - 32px, 760px);
+    color: #126d54;
+    font-size: 1rem !important;
+}
+
+.error-message {
+    width: min(100% - 32px, 760px);
+    color: #a83434;
+    font-size: 1rem !important;
+}
+
+.forum-container {
+    width: min(1120px, calc(100% - 32px)) !important;
+}
+
+.forum-container .card2 {
+    box-shadow: 0 5px 16px rgba(23, 59, 94, 0.07);
+}
+
+.forum-container .add-discussion {
+    border-top: 4px solid var(--ui-blue);
+}
+
+.forum-container .discussion {
+    border-left: 4px solid var(--ui-teal);
+}
+
+.question-meta,
+.date,
+.answers small {
+    color: var(--ui-muted) !important;
+}
+
+.forum-container button,
+.chat-container button {
+    background: var(--ui-blue);
+}
+
+.forum-container .delete-button,
+.forum-container .delete-question button {
+    background: #c34747;
+}
+
+.chat-container {
+    max-width: 900px;
+}
+
+.user-message {
+    background: #e4f1fb;
+    border-radius: 12px 12px 12px 3px;
+}
+
+.bot-response {
+    background: #e4f5f0;
+    border-radius: 12px 12px 3px 12px;
+}
+
+.spare-part-heading {
+    margin: 24px 0;
+    font-size: clamp(2rem, 4vw, 2.8rem) !important;
+}
+
+#spare-parts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: 22px;
+}
+
+.spare-part {
+    display: flex;
+    width: auto !important;
+    min-width: 0;
+    min-height: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    margin: 0 !important;
+    padding: 16px;
+    border-top: 3px solid var(--ui-blue);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.spare-part:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(23, 59, 94, 0.16);
+}
+
+.spare-part > .spare-part-image {
+    width: 100% !important;
+    height: 190px !important;
+    margin: 0 0 12px;
+    padding: 10px;
+    object-fit: contain !important;
+    border-radius: 8px;
+    background: #f0f5fa;
+}
+
+.spare-part h3 a {
+    color: var(--ui-ink);
+    text-decoration: none;
+}
+
+.spare-part h3 a:hover {
+    color: var(--ui-blue);
+}
+
+.spare-part .price,
+.price {
+    color: #ba6514 !important;
+    font-weight: 700;
+}
+
+.status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #e6f5ee;
+}
+
+.out-of-stock {
+    background: #fbe9e7;
+}
+
+.bg_img {
+    max-height: 300px;
+    object-fit: cover;
+    object-position: center 55%;
+}
+
+.container form[method="GET"] {
+    max-width: 720px;
+    gap: 10px;
+}
+
+.container form[method="GET"] input[type="text"] {
+    min-width: 0;
+    margin-right: 0;
+    background: #fff !important;
+}
+
+.container form[method="GET"] button {
+    flex: 0 0 auto;
+    background: var(--ui-blue) !important;
+}
+
+.spare-part-details {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: clamp(12px, 3vw, 28px);
+}
+
+.spare-part-details .spare-part-image {
+    width: min(100%, 420px);
+    height: 320px;
+    padding: 16px;
+    object-fit: contain;
+    background: #f0f5fa;
+}
+
+.spare-part-details h1 {
+    color: var(--ui-ink) !important;
+}
+
+.spare-part-details .price {
+    color: #ba6514 !important;
+}
+
+.quantity-controls button {
+    min-width: 42px;
+    background: var(--ui-blue) !important;
+}
+
+.quantity-controls input {
+    background: #f8fbfe;
+}
+
+.cart-table thead,
+.cart-summary thead,
+.order-items thead {
+    color: #fff;
+    background: var(--ui-ink);
+}
+
+.cart-table th,
+.cart-summary th,
+.order-items th {
+    background: transparent;
+}
+
+.cart-table tbody tr:nth-child(even),
+.cart-summary tbody tr:nth-child(even),
+.order-items tbody tr:nth-child(even) {
+    background: #f1f6fa;
+}
+
+.cart-table button.remove-button {
+    color: #fff;
+    background: #c34747;
+}
+
+.total-section,
+.total {
+    color: var(--ui-ink);
+    background: #e7f1f8;
+    border-radius: 8px;
+}
+
+.order-details,
+.order-items {
+    padding: 18px;
+    border-radius: 10px;
+    background: #f5f9fc;
+}
+
+.order-details h3,
+.order-items h3 {
+    color: var(--ui-blue-dark) !important;
+}
+
+.order-confirmation,
+.order-details strong {
+    color: var(--ui-ink);
+}
+
+.footer {
+    background: linear-gradient(115deg, var(--ui-ink-deep), #244d6e) !important;
+}
+
+.footer-section.social h3,
+.footer-bottom a {
+    color: var(--ui-amber) !important;
+}
+
+.ads-display .ad-box {
+    border-top: 3px solid var(--ui-blue);
+}
+
+.ads-display .ad-content h3 {
+    color: var(--ui-ink);
+}
+
+.page-placeholder {
+    border-top: 5px solid var(--ui-blue);
+}
+
+.page-placeholder .placeholder-actions a {
+    color: var(--ui-blue-dark);
+    background: #edf5fb;
+}
+
+@media (max-width: 700px) {
+    .spare-part-details .spare-part-image {
+        height: 240px;
+    }
+
+    .container form[method="GET"] {
+        flex-wrap: wrap;
+    }
+
+    .container form[method="GET"] input[type="text"] {
+        flex: 1 1 100%;
+    }
+
+    .container form[method="GET"] button {
+        width: 100%;
+    }
+
+    .profile-details p {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .profile-details label {
+        text-align: left;
+        margin: 0 0 5px;
+    }
+}
