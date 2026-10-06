@@ -1,60 +1,69 @@
 <?php
 require_once __DIR__ . '/../../app/bootstrap.php';
 
-session_start();
+header('Content-Type: application/json; charset=utf-8');
 
-// Enable error reporting (for debugging purposes, remove in production)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "vehicle_care_system";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
-    exit;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    header('Allow: POST');
+    exit(json_encode(['success' => false, 'message' => 'Method not allowed.']));
 }
 
-// Read and decode JSON input
+app_require_csrf_token();
+$userId = app_require_authenticated_user();
 $input = json_decode(file_get_contents('php://input'), true);
+$spareId = filter_var($input['spare_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
-if (!isset($input['spare_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Invalid input.']);
-    exit;
+if ($spareId === false) {
+    http_response_code(400);
+    exit(json_encode(['success' => false, 'message' => 'Invalid product.']));
 }
 
-$spare_id = intval($input['spare_id']);
-$user_id = $_SESSION['user_id'] ?? 1; // Replace with actual user ID logic
+$conn = app_db_connect(true);
 
-// Check if the item is already in the cart
-$sql_check = "SELECT cart_id FROM cart WHERE user_id = ? AND spare_id = ?";
-$stmt_check = $conn->prepare($sql_check);
-$stmt_check->bind_param("ii", $user_id, $spare_id);
-$stmt_check->execute();
-$result_check = $stmt_check->get_result();
+$stockStmt = $conn->prepare('SELECT stock FROM spare_parts WHERE spare_id = ?');
+$stockStmt->bind_param('i', $spareId);
+$stockStmt->execute();
+$product = $stockStmt->get_result()->fetch_assoc();
+$stockStmt->close();
 
-if ($result_check->num_rows > 0) {
-    echo json_encode(['success' => false, 'message' => 'Item already in cart.']);
-    exit;
+if (!$product || (int) $product['stock'] < 1) {
+    http_response_code(404);
+    $conn->close();
+    exit(json_encode(['success' => false, 'message' => 'This product is unavailable.']));
 }
 
-// Add the item to the cart
-$sql_insert = "INSERT INTO cart (user_id, spare_id, quantity) VALUES (?, ?, ?)";
-$stmt_insert = $conn->prepare($sql_insert);
-$quantity = 1; // Default quantity for a new item
-$stmt_insert->bind_param("iii", $user_id, $spare_id, $quantity);
+$checkStmt = $conn->prepare('SELECT cart_id FROM cart WHERE user_id = ? AND spare_id = ?');
+$checkStmt->bind_param('ii', $userId, $spareId);
+$checkStmt->execute();
+$existingItem = $checkStmt->get_result()->fetch_assoc();
+$checkStmt->close();
 
-if ($stmt_insert->execute()) {
-    echo json_encode(['success' => true, 'message' => 'Item added to cart.']);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Failed to add to cart.']);
+if ($existingItem) {
+    $cartId = (int) $existingItem['cart_id'];
+    $updateStmt = $conn->prepare('UPDATE cart SET quantity = quantity + 1 WHERE cart_id = ? AND user_id = ? AND quantity < (SELECT stock FROM spare_parts WHERE spare_id = ?)');
+    $updateStmt->bind_param('iii', $cartId, $userId, $spareId);
+    $updated = $updateStmt->execute() && $updateStmt->affected_rows === 1;
+    $updateStmt->close();
+    $conn->close();
+
+    if (!$updated) {
+        http_response_code(409);
+        exit(json_encode(['success' => false, 'message' => 'There is not enough stock for another item.']));
+    }
+
+    exit(json_encode(['success' => true, 'message' => 'Cart quantity updated.']));
 }
 
+$insertStmt = $conn->prepare('INSERT INTO cart (user_id, spare_id, quantity) VALUES (?, ?, 1)');
+$insertStmt->bind_param('ii', $userId, $spareId);
+$added = $insertStmt->execute();
+$insertStmt->close();
 $conn->close();
-?>
+
+if (!$added) {
+    http_response_code(500);
+    exit(json_encode(['success' => false, 'message' => 'Unable to add this product right now.']));
+}
+
+echo json_encode(['success' => true, 'message' => 'Item added to cart.']);
