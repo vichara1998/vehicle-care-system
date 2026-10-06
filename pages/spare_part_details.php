@@ -1,32 +1,29 @@
 <?php
 require_once __DIR__ . '/../app/bootstrap.php';
 
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "vehicle_care_system";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$conn = app_db_connect();
 
 // Fetch specific spare part details
-$spare_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-if ($spare_id === 0) {
+$spare_id = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+if ($spare_id === false) {
+    http_response_code(400);
     die("Invalid spare part ID.");
 }
 
-$sql = "SELECT * FROM spare_parts WHERE spare_id = $spare_id";
-$result = $conn->query($sql);
+$stmt = $conn->prepare("SELECT * FROM spare_parts WHERE spare_id = ?");
+$stmt->bind_param("i", $spare_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
+    $stmt->close();
+    $conn->close();
+    http_response_code(404);
     die("Spare part not found.");
 }
 
 $spare_part = $result->fetch_assoc();
+$stmt->close();
 $conn->close();
 ?>
 
@@ -174,7 +171,7 @@ $conn->close();
             margin: 0 auto 20px;
         }
     </style>
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006c">
 </head>
 
 <body>
@@ -186,7 +183,7 @@ $conn->close();
             <li><a href="pages/spareparts.php">Products</a></li>
             <li><a href="pages/user_details.php">Profile</a></li>
             <li><a href="pages/livesupport.php">Support</a></li>
-            <li><a href="auth/logout.php" id="logout-button" onclick="return confirmLogout(event);">Logout</a></li>
+            <li><form method="POST" action="auth/logout.php" class="logout-form" onsubmit="return confirm('Are you sure you want to logout?');"><input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><button type="submit" class="logout-button">Logout</button></form></li>
         </ul>
     </div>
 
@@ -211,7 +208,7 @@ $conn->close();
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const price = <?= $spare_part['price'] ?>;
+            const price = <?= json_encode((float) $spare_part['price'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
             let quantity = 1;
 
             // Function to update the quantity and total price
@@ -232,7 +229,7 @@ $conn->close();
 
             // Add event listener for the "Order Now" button
             document.getElementById('order-now-btn').addEventListener('click', function () {
-                confirmOrder(<?= $spare_part['spare_id'] ?>);
+                confirmOrder(<?= (int) $spare_part['spare_id'] ?>);
             });
 
             // Function to confirm the order and redirect to checkout
