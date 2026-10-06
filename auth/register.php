@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <base href="<?= htmlspecialchars(app_url(), ENT_QUOTES, 'UTF-8') ?>">
     <title>Register</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
 </head>
 <body class="img-background">
     <div class="main-border">
