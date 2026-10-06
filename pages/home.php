@@ -13,6 +13,7 @@ if (!isset($_SESSION['user_id'])) {
     <base href="<?= htmlspecialchars(app_url(), ENT_QUOTES, 'UTF-8') ?>">
     <title>Home</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
 </head>
 <body class="img-background">
     <!-- Menu Bar -->
