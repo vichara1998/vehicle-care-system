@@ -1,21 +1,9 @@
 <?php
 require_once __DIR__ . '/../app/bootstrap.php';
 
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "vehicle_care_system";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$conn = app_db_connect();
 
 // Start session to retrieve logged-in user's ID
-session_start();
 $user_id = $_SESSION['user_id'] ?? null; // Replace this with your actual login authentication logic
 
 if (!$user_id) {
@@ -122,7 +110,7 @@ $conn->close();
         }
 
     </style>
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006c">
 </head>
 
 <body>
@@ -135,7 +123,7 @@ $conn->close();
             <li><a href="pages/spareparts.php">Products</a></li>
             <li><a href="pages/user_details.php">Profile</a></li>
             <li><a href="pages/livesupport.php">Support</a></li>
-            <li><a href="auth/logout.php" id="logout-button" onclick="return confirmLogout(event);">Logout</a></li>
+            <li><form method="POST" action="auth/logout.php" class="logout-form" onsubmit="return confirm('Are you sure you want to logout?');"><input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><button type="submit" class="logout-button">Logout</button></form></li>
         
     </ul>
 </div>
