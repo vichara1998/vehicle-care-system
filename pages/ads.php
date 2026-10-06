@@ -1,64 +1,63 @@
 <?php
 require_once __DIR__ . '/../app/bootstrap.php';
 
-// Start session
-session_start();
-
-// Check if user_id is set in the session
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id']; // Get the logged-in user's ID from session
-} else {
-    $user_id = null; // If no user is logged in, set user_id as null
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_require_csrf_token();
 }
+$user_id = app_require_authenticated_user();
 
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "vehicle_care_system";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$conn = app_db_connect();
 
 // Handle form submission for creating an ad
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] == 'create_ad') {
-    $title = $_POST['title'] ?? null;
-    $description = $_POST['description'] ?? null;
-    $category = $_POST['category'] ?? null;
-    $price = $_POST['price'] ?? null;
-    $phone_number = $_POST['phone_number'] ?? null;
-    $image_url = $_POST['image_url'] ?? null;
+    $title = trim($_POST['title'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $category = trim($_POST['category'] ?? '');
+    $price = filter_var($_POST['price'] ?? null, FILTER_VALIDATE_FLOAT);
+    $phone_number = trim($_POST['phone_number'] ?? '');
+    $image_url = trim($_POST['image_url'] ?? '');
+    $image_scheme = strtolower((string) parse_url($image_url, PHP_URL_SCHEME));
 
-    // Validation
-    if (!$title || !$description || !$category || !$phone_number || !$price) {
-        die("Please fill out all required fields.");
+    if ($title === '' || strlen($title) > 150 || $description === '' || strlen($description) > 5000
+        || $category === '' || strlen($category) > 100 || $price === false || $price < 0
+        || $phone_number === '' || strlen($phone_number) > 30
+        || !filter_var($image_url, FILTER_VALIDATE_URL) || !in_array($image_scheme, ['http', 'https'], true)) {
+        http_response_code(400);
+        exit('Check the ad details and provide a valid HTTP or HTTPS image URL.');
     }
 
     // Insert ad into the database
     $sql = "INSERT INTO ads (user_id, title, description, image_url, category, price, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log('Ad insert prepare failed: ' . $conn->error);
+        http_response_code(500);
+        exit('Unable to post your ad right now.');
+    }
 
     // Use the correct type string
     $stmt->bind_param("issssds", $user_id, $title, $description, $image_url, $category, $price, $phone_number);
 
 
     if ($stmt->execute()) {
-        header("Location: " . $_SERVER['PHP_SELF']); // Redirect to avoid resubmitting the form
+        header('Location: ' . app_url('pages/ads.php'));
         exit();
     } else {
-        echo "Error: " . $stmt->error;
+        error_log('Ad insert failed: ' . $stmt->error);
+        http_response_code(500);
+        exit('Unable to post your ad right now.');
     }
 
     $stmt->close();
 }
 
 // Handle ad deletion
-if (isset($_GET['delete_id'])) {
-    $delete_id = $_GET['delete_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    $delete_id = filter_var($_POST['delete_id'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    if ($delete_id === false) {
+        http_response_code(400);
+        exit('Invalid ad.');
+    }
 
     // Check if the logged-in user is the owner of the ad
     $sql = "SELECT user_id FROM ads WHERE ad_id = ?";
@@ -67,11 +66,13 @@ if (isset($_GET['delete_id'])) {
     $stmt->execute();
     $stmt->store_result();
     $stmt->bind_result($ad_user_id);
-    $stmt->fetch();
+    $found = $stmt->fetch();
+    $stmt->close();
 
     // Only allow deletion if the logged-in user is the creator of the ad
-    if ($ad_user_id !== $user_id) {
-        die("You are not authorized to delete this ad.");
+    if (!$found || (int) $ad_user_id !== $user_id) {
+        http_response_code(404);
+        exit('Ad not found or you are not authorized to delete it.');
     }
 
     // Delete ad from the database
@@ -80,10 +81,12 @@ if (isset($_GET['delete_id'])) {
     $stmt->bind_param("i", $delete_id);
 
     if ($stmt->execute()) {
-        header("Location: " . $_SERVER['PHP_SELF']);
+        header('Location: ' . app_url('pages/ads.php'));
         exit();
     } else {
-        echo "Error deleting ad: " . $stmt->error;
+        error_log('Ad delete failed: ' . $stmt->error);
+        http_response_code(500);
+        exit('Unable to delete the ad right now.');
     }
 
     $stmt->close();
@@ -376,7 +379,7 @@ $result = $conn->query($sql);
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         }
     </style>
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006c">
 </head>
 
 <body>
@@ -388,7 +391,7 @@ $result = $conn->query($sql);
             <li><a href="pages/spareparts.php">Products</a></li>
             <li><a href="pages/user_details.php">Profile</a></li>
             <li><a href="pages/livesupport.php">Support</a></li>
-            <li><a href="auth/logout.php" id="logout-button" onclick="return confirmLogout(event);">Logout</a></li>
+            <li><form method="POST" action="auth/logout.php" class="logout-form" onsubmit="return confirm('Are you sure you want to logout?');"><input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><button type="submit" class="logout-button">Logout</button></form></li>
 
         </ul>
     </div>
@@ -404,12 +407,13 @@ $result = $conn->query($sql);
             <div class="modal-content">
                 <span class="close" onclick="document.getElementById('adFormModal').style.display = 'none'">&times;</span>
                 <form action="pages/ads.php" method="POST" id="adForm">
+                    <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
                     <input type="text" name="title" placeholder="Ad Title" required>
                     <textarea name="description" placeholder="Description" rows="4" required></textarea>
                     <input type="text" name="category" placeholder="Category" required>
-                    <input type="number" name="price" placeholder="Price" required>
+                    <input type="number" name="price" placeholder="Price" min="0" step="0.01" required>
                     <input type="text" name="phone_number" id="phone_number" placeholder="Enter your phone number" required>
-                    <input type="text" name="image_url" placeholder="Image URL" required>
+                    <input type="url" name="image_url" placeholder="Image URL (https://...)" required>
                     <input type="hidden" name="action" value="create_ad">
                     <button type="submit">Post Ad</button>
                 </form>
@@ -422,18 +426,21 @@ $result = $conn->query($sql);
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
                     echo '<div class="ad-box">';
-                    echo '<div class="ad-image"><img src="' . $row['image_url'] . '" alt="' . $row['title'] . '"></div>';
+                    echo '<div class="ad-image"><img src="' . htmlspecialchars(ad_image_url($row['image_url'] ?? ''), ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8') . '"></div>';
                     echo '<div class="ad-content">';
-                    echo '<h3>' . $row['title'] . '</h3>';
-                    echo '<p>' . $row['description'] . '</p>';
-                    echo '<div class="price">$' . $row['price'] . '</div>';
-                    echo '<div class="phone_number">Phone number: ' . $row['phnumber'] . '</div>';
-                    echo '<div class="category">Category: ' . $row['category'] . '</div>';
-                    echo '<div class="date">Posted on: ' . $row['created_at'] . '</div>';
+                    echo '<h3>' . htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8') . '</h3>';
+                    echo '<p>' . nl2br(htmlspecialchars($row['description'], ENT_QUOTES, 'UTF-8')) . '</p>';
+                    echo '<div class="price">$' . htmlspecialchars((string) $row['price'], ENT_QUOTES, 'UTF-8') . '</div>';
+                    echo '<div class="phone_number">Phone number: ' . htmlspecialchars($row['phone_number'], ENT_QUOTES, 'UTF-8') . '</div>';
+                    echo '<div class="category">Category: ' . htmlspecialchars($row['category'], ENT_QUOTES, 'UTF-8') . '</div>';
+                    echo '<div class="date">Posted on: ' . htmlspecialchars($row['created_at'], ENT_QUOTES, 'UTF-8') . '</div>';
 
                     // Show delete button only if the user is the creator of the ad
-                    if ($row['ad_user_id'] == $user_id) {
-                        echo '<a href="javascript:void(0);" class="delete-btn" onclick="confirmDelete(' . $row['ad_id'] . ')">Delete</a>';
+                    if ((int) $row['ad_user_id'] === $user_id) {
+                        echo '<form method="POST" onsubmit="return confirm(\'Are you sure you want to delete this ad?\');">';
+                        echo '<input type="hidden" name="_csrf_token" value="' . htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') . '">';
+                        echo '<input type="hidden" name="delete_id" value="' . (int) $row['ad_id'] . '">';
+                        echo '<button type="submit" class="delete-btn">Delete</button></form>';
                     }
                     echo '</div>';
                     echo '</div>';
@@ -453,12 +460,6 @@ $result = $conn->query($sql);
             }
         }
 
-        function confirmDelete(ad_id) {
-            var confirmDelete = confirm("Are you sure you want to delete this ad?");
-            if (confirmDelete) {
-                window.location.href = "pages/ads.php?delete_id=" + ad_id;
-            }
-        }
     </script>
 
 </body>
