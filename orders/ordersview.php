@@ -122,6 +122,7 @@ $conn->close();
         }
 
     </style>
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
 </head>
 
 <body>
