@@ -90,13 +90,6 @@ assets/
 - Additional Tools: Google Maps API for location services
 
 
-## Authors
-
-- [@E.M.V.T.Bandara](https://www.https://https://github.com/vichara1998)
-- [@T.K.R.Peiris](https://www.https://github.com/KavindaPeiris)
-- [@H.M.D.T.Karunathilaka](https://www.https://https://github.com/DTKarunathilaka)
-
-
 ## Badges
 
 
