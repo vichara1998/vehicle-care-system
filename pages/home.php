@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vehicle Care System | Home</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006h">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006l">
 </head>
 <body id="top" class="home-page">
     <!-- Menu Bar -->
@@ -33,7 +33,7 @@ if (!isset($_SESSION['user_id'])) {
         <section class="home-hero" aria-labelledby="home-title">
             <div class="home-hero-copy">
                 <span class="home-eyebrow">YOUR VEHICLE, WELL CARED FOR</span>
-                <h1 id="home-title">Welcome back, <?= htmlspecialchars($_SESSION['name'] ?? 'Driver', ENT_QUOTES, 'UTF-8') ?>.</h1>
+                <h1 id="home-title">Welcome back,<br><span class="home-hero-name"><?= htmlspecialchars($_SESSION['name'] ?? 'Driver', ENT_QUOTES, 'UTF-8') ?>.</span></h1>
                 <p>Find the parts, people, and support that keep every journey moving.</p>
                 <a class="home-primary-link" href="pages/spareparts.php">Explore spare parts <span aria-hidden="true">→</span></a>
             </div>
@@ -56,27 +56,27 @@ if (!isset($_SESSION['user_id'])) {
             <div id="cards-container" class="cards-container home-cards">
                 <div class="card home-card" data-id="1" role="link" tabindex="0" onclick="navigateToPage('pages/spareparts.php');" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigateToPage('pages/spareparts.php'); }">
                     <img src="assets/images/categories/c1.png" alt="" loading="lazy">
-                    <div class="card-content"><span class="home-card-number">01</span><h3>Spare Parts</h3><span class="home-card-arrow" aria-hidden="true">↗</span></div>
+                    <div class="card-content"><span class="home-card-number">01</span><div class="home-card-copy"><h3>Spare Parts</h3><p>Find genuine and quality vehicle parts.</p></div><span class="home-card-arrow" aria-hidden="true">→</span></div>
                 </div>
                 <div class="card home-card" data-id="2" role="link" tabindex="0" onclick="navigateToPage('pages/garages.php');" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigateToPage('pages/garages.php'); }">
                     <img src="assets/images/categories/c2.png" alt="" loading="lazy">
-                    <div class="card-content"><span class="home-card-number">02</span><h3>Garages</h3><span class="home-card-arrow" aria-hidden="true">↗</span></div>
+                    <div class="card-content"><span class="home-card-number">02</span><div class="home-card-copy"><h3>Garages</h3><p>Discover trusted garages near you.</p></div><span class="home-card-arrow" aria-hidden="true">→</span></div>
                 </div>
                 <div class="card home-card" data-id="3" role="link" tabindex="0" onclick="navigateToPage('pages/ads.php');" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigateToPage('pages/ads.php'); }">
                     <img src="assets/images/categories/c3.png" alt="" loading="lazy">
-                    <div class="card-content"><span class="home-card-number">03</span><h3>Vehicle Ads</h3><span class="home-card-arrow" aria-hidden="true">↗</span></div>
+                    <div class="card-content"><span class="home-card-number">03</span><div class="home-card-copy"><h3>Vehicle Ads</h3><p>Buy and sell vehicles with confidence.</p></div><span class="home-card-arrow" aria-hidden="true">→</span></div>
                 </div>
                 <div class="card home-card" data-id="4" role="link" tabindex="0" onclick="navigateToPage('pages/livesupport.php');" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigateToPage('pages/livesupport.php'); }">
                     <img src="assets/images/categories/c4.png" alt="" loading="lazy">
-                    <div class="card-content"><span class="home-card-number">04</span><h3>Live Support</h3><span class="home-card-arrow" aria-hidden="true">↗</span></div>
+                    <div class="card-content"><span class="home-card-number">04</span><div class="home-card-copy"><h3>Live Support</h3><p>Get instant help from our team.</p></div><span class="home-card-arrow" aria-hidden="true">→</span></div>
                 </div>
                 <div class="card home-card" data-id="5" role="link" tabindex="0" onclick="navigateToPage('pages/fastmoving.php');" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigateToPage('pages/fastmoving.php'); }">
                     <img src="assets/images/categories/c5.png" alt="" loading="lazy">
-                    <div class="card-content"><span class="home-card-number">05</span><h3>Fast Moving Services</h3><span class="home-card-arrow" aria-hidden="true">↗</span></div>
+                    <div class="card-content"><span class="home-card-number">05</span><div class="home-card-copy"><h3>Fast Moving Services</h3><p>Quick and reliable vehicle services.</p></div><span class="home-card-arrow" aria-hidden="true">→</span></div>
                 </div>
                 <div class="card home-card" data-id="6" role="link" tabindex="0" onclick="navigateToPage('pages/q_a.php');" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigateToPage('pages/q_a.php'); }">
                     <img src="assets/images/categories/c6.png" alt="" loading="lazy">
-                    <div class="card-content"><span class="home-card-number">06</span><h3>Q&amp;A Forum</h3><span class="home-card-arrow" aria-hidden="true">↗</span></div>
+                    <div class="card-content"><span class="home-card-number">06</span><div class="home-card-copy"><h3>Q&amp;A Forum</h3><p>Ask questions and share knowledge.</p></div><span class="home-card-arrow" aria-hidden="true">→</span></div>
                 </div>
             </div>
         </section>
@@ -110,7 +110,7 @@ if (!isset($_SESSION['user_id'])) {
             </nav>
             <div class="home-footer-note">
                 <h3>Made for the road ahead</h3>
-                <p>Parts, services, and helpful people — all in one place.</p>
+                <p>Parts, services, and helpful people - all in one place.</p>
             </div>
         </div>
         <div class="footer-bottom home-footer-bottom">

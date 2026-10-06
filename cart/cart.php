@@ -187,7 +187,7 @@ $conn->close();
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         }
     </style>
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006c">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006l">
 </head>
 
 <body>

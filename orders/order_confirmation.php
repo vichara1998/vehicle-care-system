@@ -120,7 +120,7 @@ $conn->close();
             margin-top: 20px;
         }
     </style>
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006c">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006l">
 </head>
 <body>
 

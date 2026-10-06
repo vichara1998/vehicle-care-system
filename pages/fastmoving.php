@@ -8,7 +8,7 @@ require_once __DIR__ . '/../app/bootstrap.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vehicle Care Services | Vehicle Care System</title>
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006c">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006l">
 </head>
 <body>
     <nav class="menu-bar" aria-label="Main navigation">
