@@ -19,7 +19,9 @@ if (!isset($_SESSION['user_id'])) {
 <body id="top" class="home-page">
     <!-- Menu Bar -->
     <div class="menu-bar">
+        
         <ul>
+            <img src="assets/images/backgrounds/logo.png" alt="Vehicle Care System Logo" class="menu-logo">
             <li><a href="pages/home.php">Home</a></li>
             <li><a href="pages/spareparts.php">Products</a></li>
             <li><a href="pages/user_details.php">Profile</a></li>
