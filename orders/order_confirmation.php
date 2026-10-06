@@ -1,34 +1,27 @@
 <?php
 require_once __DIR__ . '/../app/bootstrap.php';
 
-session_start();
+$userId = app_require_authenticated_user();
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "vehicle_care_system";
+$conn = app_db_connect();
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$order_id = filter_var($_GET['order_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+$order = null;
+$items_result = null;
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-$order_id = $_GET['order_id'] ?? 0;
-
-if ($order_id) {
+if ($order_id !== false) {
     // Fetch order details
-    $sql_order = "SELECT * FROM orders WHERE order_id = ?";
+    $sql_order = "SELECT * FROM orders WHERE order_id = ? AND user_id = ?";
     $stmt_order = $conn->prepare($sql_order);
-    $stmt_order->bind_param("i", $order_id);
+    $stmt_order->bind_param("ii", $order_id, $userId);
     $stmt_order->execute();
     $order_result = $stmt_order->get_result();
     $order = $order_result->fetch_assoc();
 
     // Fetch order items
-    $sql_items = "SELECT item_name, quantity, price, total_price FROM order_items WHERE order_id = ?";
+    $sql_items = "SELECT item_name, quantity, price, total_price FROM order_items WHERE order_id = ? AND user_id = ?";
     $stmt_items = $conn->prepare($sql_items);
-    $stmt_items->bind_param("i", $order_id);
+    $stmt_items->bind_param("ii", $order_id, $userId);
     $stmt_items->execute();
     $items_result = $stmt_items->get_result();
 
@@ -127,7 +120,7 @@ $conn->close();
             margin-top: 20px;
         }
     </style>
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006c">
 </head>
 <body>
 
@@ -137,12 +130,12 @@ $conn->close();
     <?php if ($order): ?>
         <!-- Order Details -->
         <div class="order-details">
-            <h3>Order ID: <?= $order['order_id'] ?></h3>
-            <p><strong>Total Price:</strong> $<?= $order['total_price'] ?></p>
-            <p><strong>Address:</strong> <?= $order['address'] ?></p>
-            <p><strong>Payment Method:</strong> <?= $order['payment_method'] ?></p>
-            <p><strong>Email:</strong> <?= $order['email'] ?></p>
-            <p><strong>Status:</strong> <?= $order['status'] ?></p>
+            <h3>Order ID: <?= (int) $order['order_id'] ?></h3>
+            <p><strong>Total Price:</strong> $<?= htmlspecialchars((string) $order['total_price'], ENT_QUOTES, 'UTF-8') ?></p>
+            <p><strong>Address:</strong> <?= htmlspecialchars($order['address'], ENT_QUOTES, 'UTF-8') ?></p>
+            <p><strong>Payment Method:</strong> <?= htmlspecialchars($order['payment_method'], ENT_QUOTES, 'UTF-8') ?></p>
+            <p><strong>Email:</strong> <?= htmlspecialchars($order['email'], ENT_QUOTES, 'UTF-8') ?></p>
+            <p><strong>Status:</strong> <?= htmlspecialchars($order['status'], ENT_QUOTES, 'UTF-8') ?></p>
         </div>
 
         <!-- Order Items -->
@@ -160,10 +153,10 @@ $conn->close();
                 <tbody>
                     <?php while ($item = $items_result->fetch_assoc()): ?>
                         <tr>
-                            <td><?= $item['item_name'] ?></td>
-                            <td><?= $item['quantity'] ?></td>
-                            <td>$<?= $item['price'] ?></td>
-                            <td>$<?= $item['total_price'] ?></td>
+                            <td><?= htmlspecialchars($item['item_name'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= (int) $item['quantity'] ?></td>
+                            <td>$<?= htmlspecialchars((string) $item['price'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td>$<?= htmlspecialchars((string) $item['total_price'], ENT_QUOTES, 'UTF-8') ?></td>
                         </tr>
                     <?php endwhile; ?>
                 </tbody>
