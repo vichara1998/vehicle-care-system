@@ -1,19 +1,9 @@
 <?php
 require_once __DIR__ . '/../app/bootstrap.php';
 
-session_start();
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "vehicle_care_system";
+$conn = app_db_connect();
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-$user_id = $_SESSION['user_id'] ?? 1;
+$user_id = app_require_authenticated_user();
 
 // Fetch cart items for the user
 $sql = "SELECT c.cart_id, s.spare_id, s.item_name, c.quantity, s.price 
@@ -47,6 +37,7 @@ $conn->close();
     <base href="<?= htmlspecialchars(app_url(), ENT_QUOTES, 'UTF-8') ?>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
     <title>Checkout</title>
     <style>
         /* Style for Checkout Page */
@@ -168,7 +159,7 @@ $conn->close();
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         }
     </style>
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006c">
 </head>
 
 <body>
@@ -180,7 +171,7 @@ $conn->close();
             <li><a href="pages/spareparts.php">Products</a></li>
             <li><a href="pages/user_details.php">Profile</a></li>
             <li><a href="pages/livesupport.php">Support</a></li>
-            <li><a href="auth/logout.php" id="logout-button" onclick="return confirmLogout(event);">Logout</a></li>
+            <li><form method="POST" action="auth/logout.php" class="logout-form" onsubmit="return confirm('Are you sure you want to logout?');"><input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><button type="submit" class="logout-button">Logout</button></form></li>
         </ul>
     </div>
 
@@ -218,6 +209,7 @@ $conn->close();
 
         <!-- Checkout Form -->
         <form class="checkout-form" method="POST" action="actions/orders/place_order.php" onsubmit="return confirmOrder();">
+            <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
             <h3>Delivery Address</h3>
             <input type="text" name="address" placeholder="Enter your address" required>
 
