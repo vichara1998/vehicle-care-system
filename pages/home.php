@@ -27,7 +27,9 @@ if (!isset($_SESSION['user_id'])) {
             <li><a href="pages/user_details.php">Profile</a></li>
             <li><a href="pages/livesupport.php">Support</a></li>
             <?php if (app_is_admin()): ?><li><a href="pages/admin.php">Admin</a></li><?php endif; ?>
-            <li><form method="POST" action="auth/logout.php" class="logout-form" onsubmit="return confirm('Are you sure you want to logout?');"><input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><button type="submit" class="logout-button">Logout</button></form></li>
+            <li><form method="POST" action="auth/logout.php" class="logout-form" onsubmit="return confirm('Are you sure you want to logout?');">
+                <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+            <button type="submit" class="logout-button" style="background: rgba(255, 255, 255, 0.75); color: #173b5c; padding: 8px 14px; border-radius: 7px; border: none;">Logout</button></form></li>
         </ul>
     </div>
 
