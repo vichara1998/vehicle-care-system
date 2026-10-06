@@ -1,38 +1,25 @@
 <?php
 require_once __DIR__ . '/../../app/bootstrap.php';
 
-// Start session
-session_start();
-
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "vehicle_care_system";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    header('Allow: POST');
+    exit('Method not allowed.');
 }
 
-// Fetch user_id from session
-$user_id = $_SESSION['user_id'] ?? null;
-
-// Check if user is logged in
-if (!$user_id) {
-    die("Unauthorized access. Please log in.");
-}
+app_require_csrf_token();
+$user_id = app_require_authenticated_user();
+$conn = app_db_connect();
 
 // Fetch and validate POST data
 $address = $_POST['address'] ?? null;
 $payment_method = $_POST['payment_method'] ?? null;
-$email = $_POST['email'] ?? null;
+$email = filter_var(trim($_POST['email'] ?? ''), FILTER_VALIDATE_EMAIL);
 
 // Validation
-if (!$address || !$payment_method || !$email) {
-    die("Please fill out all required fields.");
+if (!is_string($address) || trim($address) === '' || strlen($address) > 500 || !in_array($payment_method, ['credit_card', 'paypal', 'bank_transfer'], true) || $email === false) {
+    http_response_code(400);
+    exit('Enter a valid address, email, and payment method.');
 }
 
 // Fetch cart items for the user
@@ -130,7 +117,9 @@ try {
 } catch (Exception $e) {
     // Rollback transaction in case of error
     $conn->rollback();
-    die("Error placing order: " . $e->getMessage());
+    error_log('Order placement failed: ' . $e->getMessage());
+    http_response_code(500);
+    exit('Unable to complete your order right now. Please try again.');
 }
 
 // Close the prepared statements and connection

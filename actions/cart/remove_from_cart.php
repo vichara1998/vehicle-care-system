@@ -1,33 +1,35 @@
 <?php
 require_once __DIR__ . '/../../app/bootstrap.php';
 
-session_start();
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "vehicle_care_system";
+header('Content-Type: application/json; charset=utf-8');
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    header('Allow: POST');
+    exit(json_encode(['success' => false, 'message' => 'Method not allowed.']));
 }
 
-$user_id = $_SESSION['user_id'] ?? 1;
-$item_id = $_POST['item_id'];
+app_require_csrf_token();
+$userId = app_require_authenticated_user();
+$itemId = filter_var($_POST['item_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
-// Remove the item from the cart
-$sql = "DELETE FROM cart WHERE cart_id = ? AND user_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("ii", $item_id, $user_id);
+if ($itemId === false) {
+    http_response_code(400);
+    exit(json_encode(['success' => false, 'message' => 'Invalid cart item.']));
+}
+
+$conn = app_db_connect(true);
+
+$stmt = $conn->prepare('DELETE FROM cart WHERE cart_id = ? AND user_id = ?');
+$stmt->bind_param('ii', $itemId, $userId);
 $stmt->execute();
-
-if ($stmt->affected_rows > 0) {
-    echo json_encode(['success' => true]);
-} else {
-    echo json_encode(['success' => false]);
-}
-
+$removed = $stmt->affected_rows > 0;
 $stmt->close();
 $conn->close();
-?>
+
+if (!$removed) {
+    http_response_code(404);
+    exit(json_encode(['success' => false, 'message' => 'Cart item not found.']));
+}
+
+echo json_encode(['success' => true]);
