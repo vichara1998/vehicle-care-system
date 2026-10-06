@@ -1,46 +1,53 @@
 <?php
 require_once __DIR__ . '/../app/bootstrap.php';
 
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "vehicle_care_system";
+$conn = app_db_connect();
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Initialize spare parts array
+// Initialize catalog data and validate query parameters.
 $spare_parts = [];
-$search_query = isset($_GET['search']) ? $_GET['search'] : '';
+$search_query = trim((string) ($_GET['search'] ?? ''));
+$search_query = function_exists('mb_substr') ? mb_substr($search_query, 0, 100, 'UTF-8') : substr($search_query, 0, 100);
+$requestedPage = filter_var($_GET['page'] ?? 1, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+$page = $requestedPage === false ? 1 : $requestedPage;
+$pageSize = 8;
 
-if (!empty($search_query)) {
-    // Search spare parts by item name or description
-    $sql = "SELECT spare_id, item_name, description, price,image_path, stock 
-            FROM spare_parts 
-            WHERE item_name LIKE ? OR description LIKE ?";
-    $stmt = $conn->prepare($sql);
-    $search_term = "%" . $search_query . "%";
-    $stmt->bind_param("ss", $search_term, $search_term);
-    $stmt->execute();
-    $result = $stmt->get_result();
+$whereSql = '';
+$searchTerm = '%' . $search_query . '%';
+if ($search_query !== '') {
+    $whereSql = ' WHERE item_name LIKE ? OR description LIKE ?';
+}
+
+$countStmt = $conn->prepare('SELECT COUNT(*) AS total FROM spare_parts' . $whereSql);
+if ($search_query !== '') {
+    $countStmt->bind_param('ss', $searchTerm, $searchTerm);
+}
+$countStmt->execute();
+$totalItems = (int) $countStmt->get_result()->fetch_assoc()['total'];
+$countStmt->close();
+
+$totalPages = max(1, (int) ceil($totalItems / $pageSize));
+$page = min($page, $totalPages);
+$offset = ($page - 1) * $pageSize;
+$sql = 'SELECT spare_id, item_name, description, price, image_path, stock FROM spare_parts'
+    . $whereSql
+    . ' ORDER BY spare_id DESC LIMIT ? OFFSET ?';
+$stmt = $conn->prepare($sql);
+if ($search_query !== '') {
+    $stmt->bind_param('ssii', $searchTerm, $searchTerm, $pageSize, $offset);
 } else {
-    // Fetch all spare parts
-    $sql = "SELECT spare_id, item_name, description, price, image_path,stock FROM spare_parts";
-    $result = $conn->query($sql);
+    $stmt->bind_param('ii', $pageSize, $offset);
 }
-
-// Fetch results into an array
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $spare_parts[] = $row;
-    }
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $spare_parts[] = $row;
 }
-
+$stmt->close();
 $conn->close();
+
+$pageWindowStart = max(1, $page - 2);
+$pageWindowEnd = min($totalPages, $page + 2);
+$paginationQuery = $search_query === '' ? [] : ['search' => $search_query];
 ?>
 
 <!DOCTYPE html>
@@ -50,6 +57,7 @@ $conn->close();
     <base href="<?= htmlspecialchars(app_url(), ENT_QUOTES, 'UTF-8') ?>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
     <title>Spare Parts</title>
     <style>
         /* Existing CSS: Retained from your template */
@@ -245,7 +253,7 @@ $conn->close();
         }
 
     </style>
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006c">
 </head>
 
 <body>
@@ -256,7 +264,7 @@ $conn->close();
             <li><a href="pages/spareparts.php">Products</a></li>
             <li><a href="pages/user_details.php">Profile</a></li>
             <li><a href="pages/livesupport.php">Support</a></li>
-            <li><a href="auth/logout.php" id="logout-button" onclick="return confirmLogout(event);">Logout</a></li>
+            <li><form method="POST" action="auth/logout.php" class="logout-form" onsubmit="return confirm('Are you sure you want to logout?');"><input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><button type="submit" class="logout-button">Logout</button></form></li>
             <!-- Add View Cart and Orders buttons as list items -->
              <div class="buttons-container">
             <a href="cart/cart.php" class="button-link">View Cart</a>
@@ -307,6 +315,31 @@ $conn->close();
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
+
+        <?php if ($totalPages > 1): ?>
+            <nav class="pagination" aria-label="Spare parts pages">
+                <?php if ($page > 1): ?>
+                    <a class="pagination-link" href="<?= htmlspecialchars(app_url('pages/spareparts.php') . '?' . http_build_query(array_merge($paginationQuery, ['page' => $page - 1])), ENT_QUOTES, 'UTF-8') ?>" aria-label="Previous page">Previous</a>
+                <?php else: ?>
+                    <span class="pagination-link is-disabled" aria-disabled="true">Previous</span>
+                <?php endif; ?>
+
+                <?php for ($pageNumber = $pageWindowStart; $pageNumber <= $pageWindowEnd; $pageNumber++): ?>
+                    <?php if ($pageNumber === $page): ?>
+                        <span class="pagination-link is-current" aria-current="page"><?= $pageNumber ?></span>
+                    <?php else: ?>
+                        <a class="pagination-link" href="<?= htmlspecialchars(app_url('pages/spareparts.php') . '?' . http_build_query(array_merge($paginationQuery, ['page' => $pageNumber])), ENT_QUOTES, 'UTF-8') ?>"><?= $pageNumber ?></a>
+                    <?php endif; ?>
+                <?php endfor; ?>
+
+                <?php if ($page < $totalPages): ?>
+                    <a class="pagination-link" href="<?= htmlspecialchars(app_url('pages/spareparts.php') . '?' . http_build_query(array_merge($paginationQuery, ['page' => $page + 1])), ENT_QUOTES, 'UTF-8') ?>" aria-label="Next page">Next</a>
+                <?php else: ?>
+                    <span class="pagination-link is-disabled" aria-disabled="true">Next</span>
+                <?php endif; ?>
+            </nav>
+            <p class="pagination-summary">Showing <?= $offset + 1 ?>–<?= min($offset + count($spare_parts), $totalItems) ?> of <?= $totalItems ?> products</p>
+        <?php endif; ?>
     </div>
 
     <!-- JavaScript -->
@@ -315,7 +348,9 @@ $conn->close();
             fetch('actions/cart/add_to_cart.php', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
                     },
                     body: JSON.stringify({
                         spare_id: spareId
