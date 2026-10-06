@@ -7,7 +7,7 @@
 An online platform for vehicle owners in Sri Lanka to explore spare parts, connect with garage services, find vehicle advertisements, and get customer support.
 
 <p>
-  <img src="https://img.shields.io/badge/PHP-7%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+  <img src="https://img.shields.io/badge/PHP-8%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
   <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
   <img src="https://img.shields.io/badge/JavaScript-Frontend-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
   <img src="https://img.shields.io/badge/Apache-Web_Server-D22128?style=for-the-badge&logo=apache&logoColor=white" alt="Apache">
@@ -40,6 +40,9 @@ An online platform for vehicle owners in Sri Lanka to explore spare parts, conne
 vehicle-care-system/
 ├── index.php                 # Application entry point
 ├── app/                      # Shared bootstrap and URL helper
+├── config/
+│   ├── .htaccess             # Prevent direct access to local configuration
+│   └── database.example.php  # Safe template for private database settings
 ├── auth/                     # Login, registration, and logout
 ├── pages/                    # Main site pages
 ├── cart/                     # Cart and checkout pages
@@ -58,6 +61,13 @@ vehicle-care-system/
         └── social/
 ```
 
+## 🔐 Account security
+
+- New passwords must be at least 12 characters and no more than 72 bytes (the current bcrypt limit), and are hashed with PHP's `PASSWORD_DEFAULT`.
+- Login sessions use strict mode, HTTP-only cookies, SameSite=Lax, and session ID rotation after successful login.
+- State-changing account, cart, order, ad, forum, support, and logout requests require a session-bound CSRF token.
+- Password resets are not yet configured; contact the site administrator if you cannot sign in.
+
 ## 🚀 Run locally with XAMPP
 
 ### Requirements
@@ -71,13 +81,15 @@ vehicle-care-system/
 2. Open the XAMPP Control Panel and start **Apache** and **MySQL**.
 3. In phpMyAdmin, create a database named `vehicle_care_system`.
 4. Create the database tables required by the application. A database schema or seed-data file is not currently included in this repository.
-5. If your local MySQL settings differ, update the database connection settings used by the PHP pages.
-6. Open [http://localhost/VCS_website_group_project/](http://localhost/VCS_website_group_project/) in your browser.
+5. Copy `config/database.example.php` to `config/database.local.php`.
+6. Edit `config/database.local.php` with your MySQL host, database name, username, and password. Prefer a dedicated database user with access limited to this database; do not use MySQL's `root` account outside local development.
+7. Open [http://localhost/VCS_website_group_project/](http://localhost/VCS_website_group_project/) in your browser.
 
 > **Tip:** The shared URL helper supports hosting the project from a subdirectory.
 
 ## 📌 Notes
 
 - The root `index.php` redirects visitors to the login page.
-- Keep local credentials and private configuration out of commits.
+- `config/database.local.php` is excluded from Git; never commit local credentials.
+- All application database connections use the shared `app_db_connect()` helper.
 - Images, stylesheets, and scripts are stored under `assets/`.
