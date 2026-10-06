@@ -8,7 +8,7 @@ require_once __DIR__ . '/../app/bootstrap.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Garage Services | Vehicle Care System</title>
-    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006a">
+    <link rel="stylesheet" href="assets/css/app-ui.css?v=20261006c">
 </head>
 <body>
     <nav class="menu-bar" aria-label="Main navigation">
@@ -17,7 +17,7 @@ require_once __DIR__ . '/../app/bootstrap.php';
             <li><a href="pages/spareparts.php">Products</a></li>
             <li><a href="pages/user_details.php">Profile</a></li>
             <li><a href="pages/livesupport.php">Support</a></li>
-            <li><a href="auth/logout.php">Logout</a></li>
+            <li><form method="POST" action="auth/logout.php" class="logout-form" onsubmit="return confirm('Are you sure you want to logout?');"><input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><button type="submit" class="logout-button">Logout</button></form></li>
         </ul>
     </nav>
     <main class="container page-placeholder">
